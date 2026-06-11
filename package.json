@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A fully featured, simple Model Context Protocol (MCP) server demonstrating tools, resources, and prompts. No authentication. For testing and learning.",
   "type": "module",
-  "main": "dist/stdio.js",
   "bin": {
     "nodejs-mcp-server": "dist/stdio.js"
   },

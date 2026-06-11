@@ -118,11 +118,14 @@ api/
 `-- mcp.ts        # Stateless Streamable HTTP MCP endpoint
 ```
 
-Deploy with the Vercel Git integration or CLI. The Vercel build command is configured in `vercel.json`:
+Deploy with the Vercel Git integration or CLI — **no build step or framework
+preset is required**. Vercel automatically compiles the TypeScript functions in
+`api/` and serves them; `vercel.json` only configures the function timeout and
+the `/mcp` → `/api/mcp` rewrites. Leave the project's *Framework Preset* as
+**Other** and the *Build Command* / *Output Directory* empty.
 
-```bash
-npm run build:vercel
-```
+> Run `npm run build:vercel` locally if you want to type-check the handler
+> before pushing — it is not used by the deployment.
 
 After deployment:
 
