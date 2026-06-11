@@ -10,7 +10,7 @@ import { printBanner } from "./banner.js";
  * desktop clients such as Claude Desktop and the MCP Inspector when launching
  * the server as a subprocess.
  *
- * IMPORTANT: never write logs to stdout here — it is reserved for the protocol.
+ * IMPORTANT: never write logs to stdout here - it is reserved for the protocol.
  * Use stderr (console.error) for any diagnostics.
  */
 async function main(): Promise<void> {

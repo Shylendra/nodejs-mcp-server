@@ -9,7 +9,7 @@ import { z } from "zod";
  * runs and exposes the schema to clients as JSON Schema.
  */
 export function registerTools(server: McpServer): string[] {
-  // 1. A trivial echo tool — the "hello world" of MCP.
+  // 1. A trivial echo tool - the "hello world" of MCP.
   server.registerTool(
     "echo",
     {
@@ -52,7 +52,7 @@ export function registerTools(server: McpServer): string[] {
           break;
         case "divide":
           if (b === 0) {
-            // Tools report failures by returning isError, not by throwing —
+            // Tools report failures by returning isError, not by throwing -
             // this lets the model see and recover from the error.
             return {
               isError: true,

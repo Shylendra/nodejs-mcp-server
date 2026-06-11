@@ -21,7 +21,7 @@ const USERS: Record<string, { id: string; name: string; role: string }> = {
  *     optionally with a `list` callback so clients can enumerate instances.
  */
 export function registerResources(server: McpServer): string[] {
-  // 1. A static resource — server configuration as JSON.
+  // 1. A static resource - server configuration as JSON.
   server.registerResource(
     "app-config",
     "config://app",
@@ -49,7 +49,7 @@ export function registerResources(server: McpServer): string[] {
     })
   );
 
-  // 2. A static plain-text resource — a help / about document.
+  // 2. A static plain-text resource - a help / about document.
   server.registerResource(
     "about",
     "docs://about",
@@ -111,7 +111,7 @@ export function registerResources(server: McpServer): string[] {
     }
   );
 
-  // 4. A templated resource that echoes a path segment — handy for testing
+  // 4. A templated resource that echoes a path segment - handy for testing
   //    how clients render dynamic, parameterized URIs.
   server.registerResource(
     "greeting",

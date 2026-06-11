@@ -15,6 +15,7 @@
     "dev:stdio": "tsx watch src/stdio.ts",
     "dev:http": "tsx watch src/http.ts",
     "inspect": "npx @modelcontextprotocol/inspector node dist/stdio.js",
+    "test:smoke": "npm run build && node scripts/smoke.mjs",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "keywords": [

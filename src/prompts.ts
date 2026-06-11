@@ -37,7 +37,7 @@ export function registerPrompts(server: McpServer): string[] {
   );
 
   // 2. A multi-message prompt that sets up a system-style instruction plus the
-  //    user's request — useful for role-play / persona testing.
+  //    user's request - useful for role-play / persona testing.
   server.registerPrompt(
     "code_review",
     {
@@ -68,7 +68,7 @@ export function registerPrompts(server: McpServer): string[] {
     })
   );
 
-  // 3. An argument-free prompt — a fixed conversation starter.
+  // 3. An argument-free prompt - a fixed conversation starter.
   server.registerPrompt(
     "brainstorm",
     {

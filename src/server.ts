@@ -14,7 +14,7 @@ export interface ServerCatalog {
 
 /**
  * Creates a fully configured MCP server instance with all tools, resources,
- * and prompts registered. The server is transport-agnostic — connect it to a
+ * and prompts registered. The server is transport-agnostic - connect it to a
  * stdio or HTTP transport (see stdio.ts / http.ts).
  *
  * Returns both the server and a `catalog` describing what was registered, so
