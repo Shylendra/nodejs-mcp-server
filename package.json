@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:vercel": "npm run build && npm run typecheck:vercel",
     "start": "node dist/stdio.js",
     "start:http": "node dist/http.js",
     "dev": "tsc --watch",
@@ -16,6 +17,8 @@
     "dev:http": "tsx watch src/http.ts",
     "inspect": "npx @modelcontextprotocol/inspector node dist/stdio.js",
     "test:smoke": "npm run build && node scripts/smoke.mjs",
+    "test:vercel": "tsx scripts/smoke-vercel.ts",
+    "typecheck:vercel": "tsc -p tsconfig.vercel.json",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "keywords": [

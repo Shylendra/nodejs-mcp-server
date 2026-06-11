@@ -8,6 +8,7 @@ It supports two transports out of the box:
 
 - **stdio** - for desktop clients (Claude Desktop, MCP Inspector launching a subprocess).
 - **Streamable HTTP** - for HTTP-based clients, with session management.
+- **Vercel Streamable HTTP** - for serverless deployment at `/api/mcp` or `/mcp`.
 
 ---
 
@@ -77,6 +78,13 @@ Run the local smoke test to build the server, start it over stdio, and verify th
 npm run test:smoke
 ```
 
+For the Vercel serverless handler:
+
+```bash
+npm run build:vercel
+npm run test:vercel
+```
+
 ### Testing with the MCP Inspector
 
 The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the easiest way to poke at the server:
@@ -90,6 +98,42 @@ For the **HTTP** transport, start the server (`npm run start:http`) then open th
 
 - **Transport type:** `Streamable HTTP`
 - **URL:** `http://127.0.0.1:3000/mcp`
+
+For a Vercel deployment, use:
+
+- **Transport type:** `Streamable HTTP`
+- **URL:** `https://<your-project>.vercel.app/api/mcp`
+
+The repo also rewrites `/mcp` to `/api/mcp`, so `https://<your-project>.vercel.app/mcp` works too.
+
+---
+
+## Deploying to Vercel
+
+This repository includes a Vercel serverless MCP handler:
+
+```text
+api/
+|-- health.ts     # Vercel health check
+`-- mcp.ts        # Stateless Streamable HTTP MCP endpoint
+```
+
+Deploy with the Vercel Git integration or CLI. The Vercel build command is configured in `vercel.json`:
+
+```bash
+npm run build:vercel
+```
+
+After deployment:
+
+- MCP endpoint: `https://<your-project>.vercel.app/api/mcp`
+- Short MCP endpoint: `https://<your-project>.vercel.app/mcp`
+- Health endpoint: `https://<your-project>.vercel.app/api/health`
+- Short health endpoint: `https://<your-project>.vercel.app/health`
+
+The Vercel handler runs in stateless mode. It does not issue or require `Mcp-Session-Id`, which avoids relying on in-memory sessions across serverless invocations.
+
+Set `MCP_CORS_ORIGIN` in Vercel if you want to restrict browser access instead of allowing all origins.
 
 ---
 
@@ -120,6 +164,8 @@ Restart Claude Desktop, and the server's tools, resources, and prompts will appe
 | `GET` | `/mcp` | Server-Sent Events stream for server-to-client notifications. |
 | `DELETE` | `/mcp` | Terminate a session. |
 | `GET` | `/health` | Plain health check (not part of MCP). |
+
+On Vercel, the equivalent MCP path is `/api/mcp`, with `/mcp` configured as a rewrite.
 
 Sessions are tracked via the `Mcp-Session-Id` response/request header. The HTTP server binds to `127.0.0.1` by default, and the port defaults to **3000**. Both can be overridden:
 
