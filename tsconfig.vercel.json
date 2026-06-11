@@ -6,6 +6,6 @@
     "noEmit": true,
     "rootDir": "."
   },
-  "include": ["api/**/*", "scripts/smoke-vercel.ts", "src/**/*"],
+  "include": ["api/**/*", "index.ts", "scripts/smoke-vercel.ts", "src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

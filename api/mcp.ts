@@ -1,53 +1,49 @@
-import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "../src/server.js";
+
+type VercelRequest = IncomingMessage & {
+  body?: unknown;
+  method?: string;
+};
 
 const allowedMethods = new Set(["GET", "POST", "DELETE", "OPTIONS"]);
 
-function corsHeaders(): HeadersInit {
-  return {
-    "Access-Control-Allow-Origin": process.env.MCP_CORS_ORIGIN ?? "*",
-    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Accept, Mcp-Session-Id, MCP-Protocol-Version",
-    "Access-Control-Expose-Headers": "Mcp-Session-Id",
-  };
-}
-
-function withCors(response: Response): Response {
-  const headers = new Headers(response.headers);
-  for (const [key, value] of Object.entries(corsHeaders())) {
-    headers.set(key, value);
-  }
-  headers.set("Cache-Control", "no-store");
-
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-}
-
-function jsonResponse(body: unknown, init?: ResponseInit): Response {
-  return withCors(
-    Response.json(body, {
-      ...init,
-      headers: {
-        "Content-Type": "application/json",
-        ...init?.headers,
-      },
-    })
+function setCorsHeaders(res: ServerResponse): void {
+  res.setHeader("Access-Control-Allow-Origin", process.env.MCP_CORS_ORIGIN ?? "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Accept, Mcp-Session-Id, MCP-Protocol-Version"
   );
+  res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
+  res.setHeader("Cache-Control", "no-store");
 }
 
-async function handleMcpRequest(request: Request): Promise<Response> {
-  if (request.method === "OPTIONS") {
-    return withCors(new Response(null, { status: 204 }));
+function sendJson(res: ServerResponse, statusCode: number, body: unknown): void {
+  if (!res.headersSent) {
+    setCorsHeaders(res);
+    res.statusCode = statusCode;
+    res.setHeader("Content-Type", "application/json");
+  }
+  res.end(JSON.stringify(body));
+}
+
+export default async function handler(req: VercelRequest, res: ServerResponse): Promise<void> {
+  setCorsHeaders(res);
+
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    res.end();
+    return;
   }
 
-  if (!allowedMethods.has(request.method)) {
-    return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+  if (!req.method || !allowedMethods.has(req.method)) {
+    sendJson(res, 405, { error: "Method not allowed" });
+    return;
   }
 
-  const transport = new WebStandardStreamableHTTPServerTransport({
+  const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
@@ -55,21 +51,26 @@ async function handleMcpRequest(request: Request): Promise<Response> {
 
   try {
     await server.connect(transport);
-    return withCors(await transport.handleRequest(request));
+    await transport.handleRequest(req, res, req.body);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unexpected MCP handler error";
     console.error("MCP handler failed:", err);
-    return jsonResponse(
-      {
-        jsonrpc: "2.0",
-        error: { code: -32603, message },
-        id: null,
-      },
-      { status: 500 }
-    );
+
+    if (!res.headersSent) {
+      sendJson(
+        res,
+        500,
+        {
+          jsonrpc: "2.0",
+          error: { code: -32603, message },
+          id: null,
+        }
+      );
+      return;
+    }
+
+    if (!res.writableEnded) {
+      res.end();
+    }
   }
 }
-
-export default {
-  fetch: handleMcpRequest,
-};
