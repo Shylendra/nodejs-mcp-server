@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc",
     "build:vercel": "npm run build && npm run typecheck:vercel",
+    "gcp-build": "npm run build",
     "start": "node dist/http.js",
     "start:stdio": "node dist/stdio.js",
     "start:http": "node dist/http.js",

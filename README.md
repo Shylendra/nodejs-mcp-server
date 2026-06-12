@@ -151,6 +151,8 @@ npm run build
 npm start
 ```
 
+The `gcp-build` script runs the TypeScript build during Google buildpack deployments so `dist/http.js` exists before Cloud Run executes `npm start`. A `Dockerfile` is also included for container-based deployments.
+
 After deployment:
 
 - MCP endpoint: `https://<your-cloud-run-url>/mcp`
