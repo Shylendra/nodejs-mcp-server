@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "../src/server.js";
+import { logRequestError, logRequestStart, observeResponse } from "../src/logging.js";
 
 type VercelRequest = IncomingMessage & {
   body?: unknown;
@@ -30,6 +31,9 @@ function sendJson(res: ServerResponse, statusCode: number, body: unknown): void 
 }
 
 export default async function handler(req: VercelRequest, res: ServerResponse): Promise<void> {
+  const requestId = observeResponse(req, res);
+  res.setHeader("X-Request-Id", requestId);
+  logRequestStart(req, requestId);
   setCorsHeaders(res);
 
   if (req.method === "OPTIONS") {
@@ -54,7 +58,7 @@ export default async function handler(req: VercelRequest, res: ServerResponse): 
     await transport.handleRequest(req, res, req.body);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unexpected MCP handler error";
-    console.error("MCP handler failed:", err);
+    logRequestError(req, requestId, err, "MCP handler failed");
 
     if (!res.headersSent) {
       sendJson(

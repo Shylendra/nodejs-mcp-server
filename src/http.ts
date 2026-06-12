@@ -5,6 +5,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { createServer } from "./server.js";
 import { printBanner } from "./banner.js";
+import { logRequestError, logRequestStart, observeResponse } from "./logging.js";
 
 /**
  * Entry point for the Streamable HTTP transport.
@@ -26,6 +27,12 @@ if (!Number.isInteger(PORT) || PORT <= 0 || PORT > 65535) {
 
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  const requestId = observeResponse(req, res);
+  res.setHeader("X-Request-Id", requestId);
+  logRequestStart(req, requestId);
+  next();
+});
 
 // Track a transport per active session id so follow-up requests reuse state.
 const transports: Record<string, StreamableHTTPServerTransport> = {};
@@ -101,6 +108,7 @@ app.post("/mcp", async (req: Request, res: Response) => {
 
     await transport.handleRequest(req, res, req.body);
   } catch (err) {
+    logRequestError(req, res.getHeader("X-Request-Id")?.toString(), err, "MCP POST handler failed");
     writePostError(res, err);
   }
 });
@@ -115,6 +123,7 @@ async function handleSessionRequest(req: Request, res: Response): Promise<void> 
     }
     await transports[sessionId].handleRequest(req, res);
   } catch (err) {
+    logRequestError(req, res.getHeader("X-Request-Id")?.toString(), err, "MCP session handler failed");
     writeSessionError(res, err);
   }
 }
