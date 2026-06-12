@@ -18,7 +18,7 @@ import { logRequestError, logRequestStart, observeResponse } from "./logging.js"
  * URL: http://localhost:3000/mcp) or any MCP HTTP client.
  */
 const PORT = Number(process.env.PORT ?? 3000);
-const HOST = process.env.HOST ?? "127.0.0.1";
+const HOST = process.env.HOST ?? (process.env.K_SERVICE ? "0.0.0.0" : "127.0.0.1");
 
 if (!Number.isInteger(PORT) || PORT <= 0 || PORT > 65535) {
   console.error(`Invalid PORT "${process.env.PORT}". Expected an integer from 1 to 65535.`);

@@ -52,11 +52,11 @@ npm install
 # 2. Build the TypeScript
 npm run build
 
-# 3a. Run over stdio (default)
+# 3a. Run over Streamable HTTP (default for web hosts / Cloud Run)
 npm start
 
-# 3b. ...or run over Streamable HTTP
-npm run start:http
+# 3b. ...or run over stdio for desktop clients
+npm run start:stdio
 ```
 
 > **Requires Node.js >= 18.**
@@ -137,6 +137,24 @@ After deployment:
 The Vercel handler runs in stateless mode. It does not issue or require `Mcp-Session-Id`, which avoids relying on in-memory sessions across serverless invocations.
 
 Set `MCP_CORS_ORIGIN` in Vercel if you want to restrict browser access instead of allowing all origins.
+
+---
+
+## Deploying to Google Cloud Run
+
+Cloud Run sets the `PORT` environment variable, usually `8080`, and requires the container to listen on `0.0.0.0:$PORT`. The default `npm start` script runs the HTTP transport (`node dist/http.js`), and the server automatically binds to `0.0.0.0` when it detects Cloud Run via `K_SERVICE`.
+
+For source-based deployments with Google buildpacks, use the normal build/start lifecycle:
+
+```bash
+npm run build
+npm start
+```
+
+After deployment:
+
+- MCP endpoint: `https://<your-cloud-run-url>/mcp`
+- Health endpoint: `https://<your-cloud-run-url>/health`
 
 ---
 
